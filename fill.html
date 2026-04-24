@@ -24,6 +24,22 @@
     <div class="fill-nav__dots" id="progressDots"></div>
   </nav>
 
+  <div class="fill-toolbar">
+    <label class="fill-toolbar__toggle">
+      <div class="toggle-switch toggle-switch--xian">
+        <input type="checkbox" class="toggle-input" id="xianModeToggle">
+        <span class="toggle-thumb"></span>
+      </div>
+      <span class="fill-toolbar__label">修仙模式</span>
+    </label>
+    <button class="fill-toolbar__copy-btn" id="copyFromBtn">複製他人</button>
+  </div>
+
+  <div class="copy-banner hidden" id="copyBanner">
+    <span id="copyBannerText"></span>
+    <button class="copy-banner__close" id="copyBannerClose">×</button>
+  </div>
+
   <main class="page-fill">
     <div id="dayCardsContainer"></div>
 
@@ -34,6 +50,14 @@
       </button>
     </div>
   </main>
+
+  <div class="sheet-overlay hidden" id="copySheet">
+    <div class="sheet-card">
+      <p class="sheet-title">複製誰的時間？</p>
+      <div class="sheet-members" id="sheetMembers"></div>
+      <button class="btn btn--outline btn--full" id="sheetCancel">取消</button>
+    </div>
+  </div>
 
   <script type="module" src="js/fill.js"></script>
 </body>

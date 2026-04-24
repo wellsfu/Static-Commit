@@ -1,6 +1,6 @@
 import { db } from './firebase.js';
 import {
-  doc, setDoc, collection, getDocs, onSnapshot, serverTimestamp
+  doc, setDoc, addDoc, collection, getDocs, onSnapshot, serverTimestamp, query, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 export async function getMemberProfiles() {
@@ -35,6 +35,24 @@ export async function saveMemberWeekData(weekId, memberId, daysData) {
   const memberRef = doc(db, 'weeks', weekId, 'members', memberId);
   writes.push(setDoc(memberRef, { updatedAt: serverTimestamp() }, { merge: true }));
   await Promise.all(writes);
+}
+
+export async function getWeekFilledMembers(weekId) {
+  const membersRef = collection(db, 'weeks', weekId, 'members');
+  const snap = await getDocs(membersRef);
+  return new Set(snap.docs.map(d => d.id));
+}
+
+export async function addLog(weekId, entry) {
+  const logsRef = collection(db, 'weeks', weekId, 'logs');
+  await addDoc(logsRef, { ...entry, timestamp: serverTimestamp() });
+}
+
+export async function getWeekLogs(weekId) {
+  const logsRef = collection(db, 'weeks', weekId, 'logs');
+  const q = query(logsRef, orderBy('timestamp', 'desc'));
+  const snap = await getDocs(q);
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
 export function watchWeekStatus(weekId, callback) {

@@ -9,10 +9,10 @@ const weekId    = params.get('week') || getWeekId();
 const weekDates = getWeekDates(weekId);
 
 const DAY_NAMES   = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
-const TIME_START  = 13 * 60;
+const TIME_START  = 10 * 60;
 const TIME_END    = 27 * 60;
 const CELL_MIN    = 30;
-const COLS        = (TIME_END - TIME_START) / CELL_MIN; // 28 cells
+const COLS        = (TIME_END - TIME_START) / CELL_MIN; // 34 cells (10:00–27:00)
 
 function weekBadge(id) {
   const cur  = getWeekId();

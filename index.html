@@ -14,6 +14,7 @@
 </head>
 <body>
   <main class="page-home">
+    <button class="log-btn" id="logBtn" title="本週修改紀錄">🕐</button>
     <header class="home-header">
       <span class="home-icon">⚔️</span>
       <h1 class="home-title">UWU ~ 討伐</h1>
@@ -80,6 +81,16 @@
         <button class="btn btn--outline" id="modalCancel">取消</button>
         <button class="btn btn--primary" id="modalSave">儲存</button>
       </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay hidden" id="logModal">
+    <div class="modal-card modal-card--log">
+      <div class="log-modal-header">
+        <p class="modal-title">本週修改紀錄</p>
+        <button class="modal-close-btn" id="logModalClose">×</button>
+      </div>
+      <div id="logList" class="log-list"></div>
     </div>
   </div>
 

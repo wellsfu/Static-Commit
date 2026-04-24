@@ -10,6 +10,7 @@ export const MEMBERS = [
 ];
 
 export const PRESET_SLOTS = [
+  { id: 'morning',   label: '早上場', sub: '10–12時', start: '10:00', end: '12:00' },
   { id: 'early_pm',  label: '午後場', sub: '13–15時', start: '13:00', end: '15:00' },
   { id: 'afternoon', label: '下午場', sub: '15–17時', start: '15:00', end: '17:00' },
   { id: 'evening',   label: '傍晚場', sub: '17–19時', start: '17:00', end: '19:00' },

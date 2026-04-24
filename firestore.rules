@@ -5,6 +5,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+    match /weeks/{weekId}/logs/{logId} {
+      allow read: if true;
+      allow write: if true;
+    }
     match /members/{memberId} {
       allow read: if true;
       allow write: if true;

@@ -3,7 +3,10 @@ import {
   getWeekId, getWeekDates, formatDateLabel, formatDateISO,
   timeToMinutes, minutesToTime, addMinutes, formatSlotSummary
 } from './utils.js';
-import { getMemberWeekData, saveMemberWeekData, getMemberProfiles } from './data.js';
+import {
+  getMemberWeekData, saveMemberWeekData, getMemberProfiles,
+  getWeekFilledMembers, addLog
+} from './data.js';
 
 const params   = new URLSearchParams(location.search);
 const memberId = params.get('member');
@@ -15,7 +18,9 @@ if (!memberId || !MEMBERS.find(m => m.id === memberId)) {
 
 document.querySelector('.fill-nav__back').href = `index.html?week=${weekId}`;
 
+let allProfiles = {};
 getMemberProfiles().then(profiles => {
+  allProfiles = profiles;
   const member = MEMBERS.find(m => m.id === memberId);
   const name = profiles[memberId]?.displayName ?? member?.name ?? memberId;
   document.getElementById('memberName').textContent = `${name} 的出團時間`;
@@ -29,27 +34,62 @@ weekDates.forEach(d => {
   state[formatDateISO(d)] = { unavailable: false, slots: [] };
 });
 
+let originalData = {};
+let copySource   = null;
+
+// 修仙模式：OFF → 只顯示晚間/深夜；ON → 顯示全部時段
+const xianKey  = `xianMode_${memberId}`;
+let   xianMode = localStorage.getItem(xianKey) === 'true';
+const NIGHT_IDS = new Set(['night', 'late']);
+
+function visibleSlots() {
+  return xianMode ? PRESET_SLOTS : PRESET_SLOTS.filter(p => NIGHT_IDS.has(p.id));
+}
+
+function applyMemberData(saved) {
+  weekDates.forEach(d => {
+    const ds = formatDateISO(d);
+    if (saved[ds]) {
+      const rawSlots = saved[ds].slots || [];
+      state[ds] = {
+        unavailable: saved[ds].unavailable || false,
+        slots: rawSlots.map(s => {
+          const preset = PRESET_SLOTS.find(p => p.start === s.start && p.end === s.end);
+          return { id: preset ? preset.id : 'custom_' + s.start, start: s.start, end: s.end };
+        }),
+      };
+    } else {
+      state[ds] = { unavailable: false, slots: [] };
+    }
+  });
+}
+
 async function init() {
   const overlay = document.getElementById('loadingOverlay');
   try {
     const saved = await getMemberWeekData(weekId, memberId);
-    weekDates.forEach(d => {
-      const ds = formatDateISO(d);
-      if (saved[ds]) {
-        // Convert stored slots (no id) back — match by start time to preset
-        const rawSlots = saved[ds].slots || [];
-        state[ds] = {
-          unavailable: saved[ds].unavailable || false,
-          slots: rawSlots.map(s => {
-            const preset = PRESET_SLOTS.find(p => p.start === s.start && p.end === s.end);
-            return { id: preset ? preset.id : 'custom_' + s.start, start: s.start, end: s.end };
-          }),
-        };
-      }
-    });
+    applyMemberData(saved);
   } catch (e) {
     // no prior data
   }
+
+  // snapshot for diff on submit
+  weekDates.forEach(d => {
+    const ds = formatDateISO(d);
+    originalData[ds] = {
+      unavailable: state[ds].unavailable,
+      slots: state[ds].slots.map(s => ({ start: s.start, end: s.end })),
+    };
+  });
+
+  const xianToggle = document.getElementById('xianModeToggle');
+  xianToggle.checked = xianMode;
+  xianToggle.addEventListener('change', () => {
+    xianMode = xianToggle.checked;
+    localStorage.setItem(xianKey, xianMode);
+    renderAll();
+  });
+
   renderAll();
   overlay.classList.add('fade-out');
   setTimeout(() => overlay.remove(), 300);
@@ -75,6 +115,8 @@ function buildDayCard(date, ds, dayIdx) {
   article.id = `day-${ds}`;
   article.dataset.date = ds;
 
+  const slots = visibleSlots();
+
   article.innerHTML = `
     <div class="day-card__header">
       <h3 class="day-card__title">${formatDateLabel(date)}</h3>
@@ -90,7 +132,7 @@ function buildDayCard(date, ds, dayIdx) {
     <div class="slot-section collapsible ${s.unavailable ? 'hidden' : 'visible'}">
       <p class="slot-section__label">選擇時段（可多選）</p>
       <div class="preset-grid">
-        ${PRESET_SLOTS.map(p => `
+        ${slots.map(p => `
           <button class="preset-btn ${s.slots.find(sl => sl.id === p.id) ? 'selected' : ''}" data-slot-id="${p.id}">
             <span class="preset-btn__name">${p.label}</span>
             <span class="preset-btn__time">${p.sub}</span>
@@ -154,14 +196,14 @@ function refreshAdjSection(ds, article) {
 
     adjEl.querySelectorAll('.time-adj-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const slotId = btn.closest('.time-adj-row').dataset.slotId;
-        const field  = btn.dataset.field;
-        const delta  = parseInt(btn.dataset.delta, 10);
+        const slotId  = btn.closest('.time-adj-row').dataset.slotId;
+        const field   = btn.dataset.field;
+        const delta   = parseInt(btn.dataset.delta, 10);
         const slotIdx = state[ds].slots.findIndex(s => s.id === slotId);
         if (slotIdx < 0) return;
-        const sl = state[ds].slots[slotIdx];
+        const sl  = state[ds].slots[slotIdx];
         const min = field === 'start' ? TIME_MIN : timeToMinutes(sl.start) + TIME_STEP;
-        const max = field === 'end'   ? TIME_MAX : timeToMinutes(sl.end) - TIME_STEP;
+        const max = field === 'end'   ? TIME_MAX : timeToMinutes(sl.end)   - TIME_STEP;
         sl[field] = addMinutes(sl[field], delta, min, max);
         refreshAdjSection(ds, article);
         updateSummary(ds, article);
@@ -173,8 +215,8 @@ function refreshAdjSection(ds, article) {
         const hidden = display.querySelector('input[type="time"]');
         hidden.click();
         hidden.addEventListener('change', () => {
-          const slotId = display.closest('.time-adj-row').dataset.slotId;
-          const field  = display.dataset.field;
+          const slotId  = display.closest('.time-adj-row').dataset.slotId;
+          const field   = display.dataset.field;
           const slotIdx = state[ds].slots.findIndex(s => s.id === slotId);
           if (slotIdx < 0) return;
           const [h, m] = hidden.value.split(':').map(Number);
@@ -190,8 +232,8 @@ function refreshAdjSection(ds, article) {
 }
 
 function buildAdjRow(slot) {
-  const preset = PRESET_SLOTS.find(p => p.id === slot.id);
-  const label = preset ? preset.label : '自訂';
+  const preset   = PRESET_SLOTS.find(p => p.id === slot.id);
+  const label    = preset ? preset.label : '自訂';
   const startMin = timeToMinutes(slot.start);
   const endMin   = timeToMinutes(slot.end);
   const invalid  = startMin >= endMin;
@@ -268,7 +310,6 @@ function updateProgressDots() {
     });
     dotsEl.appendChild(btn);
   });
-
 }
 
 function updateSubmitWarning() {
@@ -279,6 +320,89 @@ function updateSubmitWarning() {
   }).length;
   const warn = document.getElementById('submitWarning');
   if (warn) warn.textContent = unfilled > 0 ? `⚠️ 尚有 ${unfilled} 天未填寫` : '';
+}
+
+// --- 複製他人 ---
+document.getElementById('copyFromBtn').addEventListener('click', openCopySheet);
+document.getElementById('sheetCancel').addEventListener('click', closeCopySheet);
+document.getElementById('copySheet').addEventListener('click', e => {
+  if (e.target.id === 'copySheet') closeCopySheet();
+});
+document.getElementById('copyBannerClose').addEventListener('click', () => {
+  document.getElementById('copyBanner').classList.add('hidden');
+});
+
+async function openCopySheet() {
+  const sheet       = document.getElementById('copySheet');
+  const sheetMembersEl = document.getElementById('sheetMembers');
+  sheet.classList.remove('hidden');
+  sheetMembersEl.innerHTML = '<p class="sheet-loading">載入中…</p>';
+
+  let filledSet = new Set();
+  try { filledSet = await getWeekFilledMembers(weekId); } catch (e) {}
+
+  sheetMembersEl.innerHTML = '';
+  MEMBERS.filter(m => m.id !== memberId).forEach(m => {
+    const isFilled = filledSet.has(m.id);
+    const name = allProfiles[m.id]?.displayName ?? m.name;
+    const btn = document.createElement('button');
+    btn.className = 'sheet-member-btn' + (isFilled ? '' : ' unfilled');
+    btn.innerHTML = `<span>${name}</span>${isFilled ? '' : '<span class="sheet-member-btn__status">未填</span>'}`;
+    btn.addEventListener('click', () => handleCopySelect(m.id, name));
+    sheetMembersEl.appendChild(btn);
+  });
+}
+
+function closeCopySheet() {
+  document.getElementById('copySheet').classList.add('hidden');
+}
+
+async function handleCopySelect(sourceMemberId, sourceName) {
+  closeCopySheet();
+  const container = document.getElementById('dayCardsContainer');
+  container.innerHTML = `<p style="padding:var(--space-8);text-align:center;color:var(--text-muted)">套用中…</p>`;
+
+  try {
+    const saved = await getMemberWeekData(weekId, sourceMemberId);
+    if (Object.keys(saved).length === 0) {
+      renderAll();
+      showBannerMsg(`${sourceName} 本週尚無填寫資料`);
+      return;
+    }
+    applyMemberData(saved);
+    copySource = sourceMemberId;
+    renderAll();
+    showBannerMsg(`已套用 ${sourceName} 的資料，請確認後再送出`, false);
+  } catch (e) {
+    console.error(e);
+    renderAll();
+    showBannerMsg('載入失敗，請重試');
+  }
+}
+
+function showBannerMsg(msg, autoDismiss = true) {
+  const banner = document.getElementById('copyBanner');
+  document.getElementById('copyBannerText').textContent = msg;
+  banner.classList.remove('hidden');
+  if (autoDismiss) setTimeout(() => banner.classList.add('hidden'), 3000);
+}
+
+// --- 送出 ---
+function computeAvailabilityDiff(original, next) {
+  const diff = {};
+  for (const date of Object.keys(next)) {
+    const from = original[date] || { unavailable: false, slots: [] };
+    const to   = next[date];
+    const fromSlots = JSON.stringify((from.slots || []).map(s => ({ start: s.start, end: s.end })));
+    const toSlots   = JSON.stringify(to.slots.map(s => ({ start: s.start, end: s.end })));
+    if (from.unavailable !== to.unavailable || fromSlots !== toSlots) {
+      diff[date] = {
+        from: { unavailable: from.unavailable, slots: (from.slots || []).map(s => ({ start: s.start, end: s.end })) },
+        to:   { unavailable: to.unavailable,   slots: to.slots.map(s => ({ start: s.start, end: s.end })) },
+      };
+    }
+  }
+  return diff;
 }
 
 document.getElementById('submitBtn').addEventListener('click', async () => {
@@ -308,6 +432,13 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
 
   try {
     await saveMemberWeekData(weekId, memberId, payload);
+    const diff = computeAvailabilityDiff(originalData, payload);
+    addLog(weekId, {
+      action: 'availability_submit',
+      memberId,
+      diff,
+      copySource: copySource || null,
+    }).catch(e => console.warn('Log write failed:', e));
     btn.textContent = '✅ 已送出！';
     setTimeout(() => { location.href = `index.html?week=${weekId}`; }, 1200);
   } catch (e) {
