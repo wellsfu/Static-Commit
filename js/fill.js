@@ -65,7 +65,10 @@ function buildDayCard(date, ds) {
   article.dataset.date = ds;
 
   article.innerHTML = `
-    <h3 class="day-card__title">${formatDateLabel(date)}</h3>
+    <div class="day-card__header">
+      <h3 class="day-card__title">${formatDateLabel(date)}</h3>
+      <button class="day-card__apply-btn" title="複製此天設定到所有其他天">套用到其他天</button>
+    </div>
     <label class="unavailable-toggle">
       <span>無法出團</span>
       <div class="toggle-switch">
@@ -88,6 +91,8 @@ function buildDayCard(date, ds) {
       <p class="slot-summary" id="summary-${ds}"></p>
     </div>
   `;
+
+  article.querySelector('.day-card__apply-btn').addEventListener('click', () => applyToAll(ds));
 
   article.querySelector('.toggle-input').addEventListener('change', e => {
     state[ds].unavailable = e.target.checked;
@@ -206,6 +211,28 @@ function buildAdjRow(slot) {
       </div>
     </div>
   `;
+}
+
+function applyToAll(sourceDs) {
+  const src = state[sourceDs];
+  weekDates.forEach(d => {
+    const ds = formatDateISO(d);
+    if (ds === sourceDs) return;
+    state[ds] = {
+      unavailable: src.unavailable,
+      slots: src.slots.map(sl => ({ ...sl })),
+    };
+  });
+  renderAll();
+  const btn = document.getElementById(`day-${sourceDs}`)?.querySelector('.day-card__apply-btn');
+  if (btn) {
+    btn.textContent = '已套用！';
+    btn.classList.add('applied');
+    setTimeout(() => {
+      btn.textContent = '套用到其他天';
+      btn.classList.remove('applied');
+    }, 2000);
+  }
 }
 
 function updateSummary(ds, article) {
