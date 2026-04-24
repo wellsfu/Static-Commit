@@ -184,3 +184,37 @@
   opacity: 0;
   pointer-events: none;
 }
+
+.week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.week-nav__btn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.week-nav__btn:active {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.week-nav__label {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  text-align: center;
+}

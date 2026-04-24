@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <meta name="theme-color" content="#0F0F1A">
   <meta name="format-detection" content="telephone=no">
-  <title>本週出團總覽 — FF14</title>
+  <title>出團總覽 — FF14</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
@@ -15,9 +15,13 @@
 <body>
   <main class="page-overview">
     <div class="overview-header">
-      <a href="index.html" class="overview-back">← 返回首頁</a>
-      <h1 class="overview-title">本週出團總覽</h1>
-      <p class="overview-subtitle" id="overviewWeekLabel">載入中...</p>
+      <a href="index.html" class="overview-back" id="backLink">← 返回首頁</a>
+      <h1 class="overview-title">出團總覽</h1>
+      <div class="week-nav" style="margin-bottom: var(--space-2);">
+        <button class="week-nav__btn" id="prevWeek">‹</button>
+        <p class="overview-subtitle week-nav__label" id="overviewWeekLabel">載入中...</p>
+        <button class="week-nav__btn" id="nextWeek">›</button>
+      </div>
       <p class="overview-subtitle" id="overviewFillCount"></p>
       <p class="overview-missing" id="overviewMissing"></p>
     </div>

@@ -62,6 +62,13 @@ export function getWeekLabel(weekDates) {
   return `${start.getMonth() + 1}/${start.getDate()}（${dayNames[start.getDay()]}）– ${end.getMonth() + 1}/${end.getDate()}（${dayNames[end.getDay()]}）`;
 }
 
+export function shiftWeek(weekId, delta) {
+  const monday = getWeekDates(weekId)[0];
+  const shifted = new Date(monday);
+  shifted.setDate(monday.getDate() + delta * 7);
+  return getWeekId(shifted);
+}
+
 export function timeToMinutes(timeStr) {
   const [h, m] = timeStr.split(':').map(Number);
   return h * 60 + m;

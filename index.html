@@ -16,8 +16,12 @@
   <main class="page-home">
     <header class="home-header">
       <span class="home-icon">⚔️</span>
-      <h1 class="home-title">本週出團調查</h1>
-      <p class="home-subtitle" id="weekLabel">載入中...</p>
+      <h1 class="home-title">出團調查</h1>
+      <div class="week-nav">
+        <button class="week-nav__btn" id="prevWeek">‹</button>
+        <span class="week-nav__label" id="weekLabel">載入中...</span>
+        <button class="week-nav__btn" id="nextWeek">›</button>
+      </div>
     </header>
 
     <hr class="divider">
@@ -43,7 +47,7 @@
     </section>
 
     <section class="section" style="padding-top: 0">
-      <a href="overview.html" class="btn btn--outline btn--full">
+      <a href="overview.html" class="btn btn--outline btn--full" id="overviewLink">
         📊 查看本週總覽
       </a>
     </section>

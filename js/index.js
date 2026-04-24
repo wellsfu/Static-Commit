@@ -1,11 +1,30 @@
 import { MEMBERS } from './constants.js';
-import { getWeekId, getWeekDates, getWeekLabel } from './utils.js';
+import { getWeekId, getWeekDates, getWeekLabel, shiftWeek } from './utils.js';
 import { watchWeekStatus } from './data.js';
 
-const weekId    = getWeekId();
+const params  = new URLSearchParams(location.search);
+const weekId  = params.get('week') || getWeekId();
 const weekDates = getWeekDates(weekId);
 
-document.getElementById('weekLabel').textContent = getWeekLabel(weekDates);
+function weekBadge(id) {
+  const cur  = getWeekId();
+  if (id === cur)                return '本週　';
+  if (id === shiftWeek(cur,  1)) return '下週　';
+  if (id === shiftWeek(cur, -1)) return '上週　';
+  return '';
+}
+
+document.getElementById('weekLabel').textContent =
+  weekBadge(weekId) + getWeekLabel(weekDates);
+
+document.getElementById('overviewLink').href = `overview.html?week=${weekId}`;
+
+document.getElementById('prevWeek').addEventListener('click', () => {
+  location.href = `index.html?week=${shiftWeek(weekId, -1)}`;
+});
+document.getElementById('nextWeek').addEventListener('click', () => {
+  location.href = `index.html?week=${shiftWeek(weekId, 1)}`;
+});
 
 const grid = document.getElementById('memberGrid');
 

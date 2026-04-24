@@ -13,6 +13,7 @@ if (!memberId || !MEMBERS.find(m => m.id === memberId)) {
   location.href = 'index.html';
 }
 
+document.querySelector('.fill-nav__back').href = `index.html?week=${weekId}`;
 document.getElementById('memberName').textContent = `${memberId} 的出團時間`;
 
 const weekDates = getWeekDates(weekId);
