@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0F0F1A">
+  <meta name="format-detection" content="telephone=no">
+  <title>出團調查 — FF14</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+  <main class="page-home">
+    <header class="home-header">
+      <span class="home-icon">⚔️</span>
+      <h1 class="home-title">本週出團調查</h1>
+      <p class="home-subtitle" id="weekLabel">載入中...</p>
+    </header>
+
+    <hr class="divider">
+
+    <section class="section">
+      <h2 class="section-label">你是誰？</h2>
+      <div class="member-grid" id="memberGrid">
+        <!-- 由 JS 動態生成 -->
+      </div>
+    </section>
+
+    <hr class="divider">
+
+    <section class="section">
+      <div class="fill-status__label">
+        <span>填寫狀態</span>
+        <span id="fillCount">0 / 8 人</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-bar__fill" id="progressFill" style="width: 0%"></div>
+      </div>
+      <p class="fill-status__missing" id="missingMembers"></p>
+    </section>
+
+    <section class="section" style="padding-top: 0">
+      <a href="overview.html" class="btn btn--outline btn--full">
+        📊 查看本週總覽
+      </a>
+    </section>
+  </main>
+
+  <script type="module" src="js/index.js"></script>
+</body>
+</html>

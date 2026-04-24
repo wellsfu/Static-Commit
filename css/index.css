@@ -1,0 +1,102 @@
+.page-home {
+  max-width: 480px;
+  margin: 0 auto;
+  padding-top: var(--space-12);
+  padding-bottom: var(--space-8);
+}
+
+.home-header {
+  text-align: center;
+  padding: 0 var(--space-4) var(--space-6);
+}
+
+.home-icon {
+  font-size: 40px;
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.home-title {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  margin-bottom: var(--space-1);
+}
+
+.home-subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+}
+
+hr.divider {
+  border: none;
+  border-top: 1px solid var(--divider);
+  margin: 0 var(--space-4);
+}
+
+.member-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.member-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: calc(50% - 4px);
+  height: 72px;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.member-btn:active {
+  background: var(--bg-card-hover);
+  border-color: var(--primary);
+}
+
+.member-btn.filled {
+  border-color: var(--success);
+}
+
+.member-btn__name {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.member-btn__role {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+}
+
+.member-btn__badge {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.fill-status__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--space-2);
+}
+
+.fill-status__missing {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--warning);
+  min-height: 20px;
+}

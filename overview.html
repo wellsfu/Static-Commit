@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="theme-color" content="#0F0F1A">
+  <meta name="format-detection" content="telephone=no">
+  <title>本週出團總覽 — FF14</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/overview.css">
+</head>
+<body>
+  <main class="page-overview">
+    <div class="overview-header">
+      <a href="index.html" class="overview-back">← 返回首頁</a>
+      <h1 class="overview-title">本週出團總覽</h1>
+      <p class="overview-subtitle" id="overviewWeekLabel">載入中...</p>
+      <p class="overview-subtitle" id="overviewFillCount"></p>
+      <p class="overview-missing" id="overviewMissing"></p>
+    </div>
+
+    <div class="heatmap-section">
+      <p class="heatmap-scroll-hint">← 左右滑動查看完整時間軸 →</p>
+      <div class="heatmap-wrapper" id="heatmapWrapper">
+        <p class="empty-hint">載入中...</p>
+      </div>
+    </div>
+
+    <div class="detail-panel hidden" id="detailPanel">
+      <div class="detail-panel__header">
+        <div id="detailHeader"></div>
+        <div class="detail-panel__subhead" id="detailSubhead"></div>
+      </div>
+      <div class="detail-members" id="detailMembers"></div>
+    </div>
+  </main>
+
+  <script type="module" src="js/overview.js"></script>
+</body>
+</html>
