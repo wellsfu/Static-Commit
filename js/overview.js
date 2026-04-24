@@ -2,7 +2,7 @@ import { MEMBERS } from './constants.js';
 import {
   getWeekId, getWeekDates, getWeekLabel, formatDateISO, timeToMinutes, shiftWeek
 } from './utils.js';
-import { getFullWeekData, watchWeekStatus } from './data.js';
+import { getFullWeekData, watchWeekStatus, getMemberProfiles } from './data.js';
 
 const params    = new URLSearchParams(location.search);
 const weekId    = params.get('week') || getWeekId();
@@ -34,9 +34,16 @@ document.getElementById('nextWeek').addEventListener('click', () => {
   location.href = `overview.html?week=${shiftWeek(weekId, 1)}`;
 });
 
+let memberProfiles = {};
+getMemberProfiles().then(p => { memberProfiles = p; });
+
+function displayName(m) {
+  return memberProfiles[m.id]?.displayName ?? m.name;
+}
+
 watchWeekStatus(weekId, filledIds => {
   const filledSet = new Set(filledIds);
-  const missing = MEMBERS.filter(m => !filledSet.has(m.id)).map(m => m.name);
+  const missing = MEMBERS.filter(m => !filledSet.has(m.id)).map(m => displayName(m));
   document.getElementById('overviewFillCount').textContent =
     `已填：${filledIds.length} / ${MEMBERS.length}`;
   document.getElementById('overviewMissing').textContent =
@@ -178,7 +185,7 @@ function showDetail(fullData, ds, minutePoint, rowIdx) {
                 : ms.status === 'unavailable' ? '❌'
                 : '⬜';
     const note = ms.status === 'unfilled' ? '（未填寫）' : '';
-    return `<span class="detail-member">${icon} ${ms.member.name}${note}</span>`;
+    return `<span class="detail-member">${icon} ${displayName(ms.member)}${note}</span>`;
   }).join('');
 }
 

@@ -39,6 +39,11 @@ hr.divider {
   gap: var(--space-2);
 }
 
+.member-item {
+  position: relative;
+  width: calc(50% - 4px);
+}
+
 .member-btn {
   position: relative;
   display: flex;
@@ -46,7 +51,7 @@ hr.divider {
   align-items: center;
   justify-content: center;
   gap: 3px;
-  width: calc(50% - 4px);
+  width: 100%;
   height: 72px;
   background: var(--bg-card);
   border: 1.5px solid var(--border);
@@ -83,6 +88,94 @@ hr.divider {
   right: 8px;
   font-size: 14px;
   line-height: 1;
+}
+
+.member-edit-btn {
+  position: absolute;
+  bottom: 6px;
+  left: 7px;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  background: var(--bg-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  z-index: 1;
+}
+.member-item:hover .member-edit-btn,
+.member-item:focus-within .member-edit-btn {
+  opacity: 0.7;
+}
+.member-edit-btn:active {
+  opacity: 1;
+  color: var(--primary);
+  border-color: var(--primary);
+}
+
+/* On touch devices, always show the edit button since hover doesn't exist */
+@media (hover: none) {
+  .member-edit-btn {
+    opacity: 0.5;
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: var(--space-4);
+}
+.modal-overlay.hidden {
+  display: none;
+}
+.modal-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  width: 100%;
+  max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.modal-title {
+  font-size: var(--text-base);
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary);
+}
+.modal-input {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-lg);
+  font-family: inherit;
+  color: var(--text-primary);
+  text-align: center;
+  outline: none;
+}
+.modal-input:focus {
+  border-color: var(--primary);
+}
+.modal-actions {
+  display: flex;
+  gap: var(--space-3);
+}
+.modal-actions .btn {
+  flex: 1;
 }
 
 .fill-status__label {

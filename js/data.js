@@ -3,6 +3,21 @@ import {
   doc, setDoc, collection, getDocs, onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
+export async function getMemberProfiles() {
+  const snap = await getDocs(collection(db, 'members'));
+  const result = {};
+  snap.forEach(d => { result[d.id] = d.data(); });
+  return result;
+}
+
+export async function saveMemberProfile(memberId, displayName) {
+  await setDoc(
+    doc(db, 'members', memberId),
+    { displayName, updatedAt: serverTimestamp() },
+    { merge: true }
+  );
+}
+
 export async function getMemberWeekData(weekId, memberId) {
   const daysRef = collection(db, 'weeks', weekId, 'members', memberId, 'days');
   const snapshot = await getDocs(daysRef);

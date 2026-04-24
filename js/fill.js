@@ -3,7 +3,7 @@ import {
   getWeekId, getWeekDates, formatDateLabel, formatDateISO,
   timeToMinutes, minutesToTime, addMinutes, formatSlotSummary
 } from './utils.js';
-import { getMemberWeekData, saveMemberWeekData } from './data.js';
+import { getMemberWeekData, saveMemberWeekData, getMemberProfiles } from './data.js';
 
 const params   = new URLSearchParams(location.search);
 const memberId = params.get('member');
@@ -14,7 +14,12 @@ if (!memberId || !MEMBERS.find(m => m.id === memberId)) {
 }
 
 document.querySelector('.fill-nav__back').href = `index.html?week=${weekId}`;
-document.getElementById('memberName').textContent = `${memberId} 的出團時間`;
+
+getMemberProfiles().then(profiles => {
+  const member = MEMBERS.find(m => m.id === memberId);
+  const name = profiles[memberId]?.displayName ?? member?.name ?? memberId;
+  document.getElementById('memberName').textContent = `${name} 的出團時間`;
+});
 
 const weekDates = getWeekDates(weekId);
 

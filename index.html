@@ -53,6 +53,18 @@
     </section>
   </main>
 
+  <div class="modal-overlay hidden" id="nicknameModal">
+    <div class="modal-card">
+      <p class="modal-title">更改暱稱</p>
+      <input class="modal-input" id="nicknameInput" type="text" maxlength="12"
+             autocomplete="off" placeholder="輸入新暱稱">
+      <div class="modal-actions">
+        <button class="btn btn--outline" id="modalCancel">取消</button>
+        <button class="btn btn--primary" id="modalSave">儲存</button>
+      </div>
+    </div>
+  </div>
+
   <script type="module" src="js/index.js"></script>
 </body>
 </html>
