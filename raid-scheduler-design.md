@@ -194,7 +194,7 @@ service cloud.firestore {
 │                         │
 │  ──────────────────     │
 │                         │
-│  你是誰？               │  ← section label 12px 大寫
+│  誰是你？               │  ← section label 12px 大寫
 │                         │
 │  ┌────────┐ ┌────────┐  │
 │  │  小六   │ │  松坂   │  │  ← 成員按鈕 2欄
@@ -653,7 +653,7 @@ body {
 
     <!-- 成員選擇 -->
     <section class="section">
-      <h2 class="section-label">你是誰？</h2>
+      <h2 class="section-label">誰是你？</h2>
       <div class="member-grid" id="memberGrid">
         <!-- 由 JS 動態生成 -->
       </div>
