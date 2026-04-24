@@ -307,7 +307,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   try {
     await saveMemberWeekData(weekId, memberId, payload);
     btn.textContent = '✅ 已送出！';
-    setTimeout(() => { location.href = 'index.html'; }, 1200);
+    setTimeout(() => { location.href = `index.html?week=${weekId}`; }, 1200);
   } catch (e) {
     console.error(e);
     btn.disabled = false;
