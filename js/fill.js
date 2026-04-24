@@ -24,6 +24,7 @@ weekDates.forEach(d => {
 });
 
 async function init() {
+  const overlay = document.getElementById('loadingOverlay');
   try {
     const saved = await getMemberWeekData(weekId, memberId);
     weekDates.forEach(d => {
@@ -44,6 +45,8 @@ async function init() {
     // no prior data
   }
   renderAll();
+  overlay.classList.add('fade-out');
+  setTimeout(() => overlay.remove(), 300);
 }
 
 function renderAll() {
@@ -283,7 +286,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true;
-  btn.textContent = '儲存中…';
+  btn.innerHTML = '<span class="spinner spinner--sm"></span>儲存中…';
 
   const payload = {};
   weekDates.forEach(d => {
@@ -302,7 +305,7 @@ document.getElementById('submitBtn').addEventListener('click', async () => {
   } catch (e) {
     console.error(e);
     btn.disabled = false;
-    btn.textContent = '✅ 確認送出';
+    btn.innerHTML = '✅ 確認送出';
     alert('儲存失敗，請確認網路後重試。');
   }
 });

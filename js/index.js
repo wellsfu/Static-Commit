@@ -40,5 +40,5 @@ function updateStatus(filledIds) {
   missingEl.textContent = missing.length > 0 ? `未填：${missing.join('、')}` : '全員已填寫 🎉';
 }
 
-renderMembers(new Set());
+grid.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
 watchWeekStatus(weekId, updateStatus);

@@ -170,19 +170,19 @@ function hideDetail() {
 }
 
 async function init() {
+  const wrapper = document.getElementById('heatmapWrapper');
+  wrapper.innerHTML = '<div class="loading-center"><div class="spinner spinner--lg"></div><span>載入中…</span></div>';
   try {
     const fullData = await getFullWeekData(weekId);
     const hasData = Object.keys(fullData).length > 0;
     if (!hasData) {
-      document.getElementById('heatmapWrapper').innerHTML =
-        '<p class="empty-hint">本週尚無人填寫</p>';
+      wrapper.innerHTML = '<p class="empty-hint">本週尚無人填寫</p>';
       return;
     }
     renderHeatmap(fullData);
   } catch (e) {
     console.error(e);
-    document.getElementById('heatmapWrapper').innerHTML =
-      '<p class="empty-hint">載入失敗，請重新整理頁面</p>';
+    wrapper.innerHTML = '<p class="empty-hint">載入失敗，請重新整理頁面</p>';
   }
 }
 
