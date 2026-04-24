@@ -55,9 +55,27 @@
 
   <div class="modal-overlay hidden" id="nicknameModal">
     <div class="modal-card">
-      <p class="modal-title">更改暱稱</p>
-      <input class="modal-input" id="nicknameInput" type="text" maxlength="12"
-             autocomplete="off" placeholder="輸入新暱稱">
+      <p class="modal-title" id="modalTitle">更改資料</p>
+
+      <div class="modal-field">
+        <label class="modal-label" for="nicknameInput">暱稱</label>
+        <input class="modal-input" id="nicknameInput" type="text" maxlength="12"
+               autocomplete="off" placeholder="輸入暱稱">
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label" for="jobInput">職業</label>
+        <input class="modal-input modal-input--sm" id="jobInput" type="text"
+               list="ff14JobList" maxlength="10" autocomplete="off"
+               placeholder="選擇或輸入職業名稱">
+        <datalist id="ff14JobList"></datalist>
+      </div>
+
+      <div class="modal-field">
+        <label class="modal-label">位置</label>
+        <div class="modal-position-grid" id="positionGrid"></div>
+      </div>
+
       <div class="modal-actions">
         <button class="btn btn--outline" id="modalCancel">取消</button>
         <button class="btn btn--primary" id="modalSave">儲存</button>

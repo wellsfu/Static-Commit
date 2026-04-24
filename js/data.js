@@ -10,10 +10,10 @@ export async function getMemberProfiles() {
   return result;
 }
 
-export async function saveMemberProfile(memberId, displayName) {
+export async function saveMemberProfile(memberId, profileData) {
   await setDoc(
     doc(db, 'members', memberId),
-    { displayName, updatedAt: serverTimestamp() },
+    { ...profileData, updatedAt: serverTimestamp() },
     { merge: true }
   );
 }

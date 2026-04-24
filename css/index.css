@@ -104,26 +104,43 @@ hr.divider {
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 0;
-  transition: opacity var(--transition-fast), color var(--transition-fast);
+  opacity: 0.3;
+  transition: opacity var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   z-index: 1;
 }
 .member-item:hover .member-edit-btn,
 .member-item:focus-within .member-edit-btn {
-  opacity: 0.7;
-}
-.member-edit-btn:active {
   opacity: 1;
   color: var(--primary);
   border-color: var(--primary);
 }
+.member-edit-btn:active {
+  opacity: 1;
+  color: var(--primary-light);
+  border-color: var(--primary-light);
+}
 
-/* On touch devices, always show the edit button since hover doesn't exist */
 @media (hover: none) {
   .member-edit-btn {
     opacity: 0.5;
   }
 }
+
+/* Position badge on member card */
+.member-pos-badge {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  line-height: 1.4;
+  border: 1px solid;
+}
+.pos-tank { color: #4A7EC7; border-color: #4A7EC7; background: rgba(74,126,199,0.15); }
+.pos-heal { color: #4AAF6E; border-color: #4AAF6E; background: rgba(74,175,110,0.15); }
+.pos-dps  { color: #C94040; border-color: #C94040; background: rgba(201,64,64,0.15);  }
 
 .modal-overlay {
   position: fixed;
@@ -145,6 +162,8 @@ hr.divider {
   padding: var(--space-6);
   width: 100%;
   max-width: 320px;
+  max-height: 90dvh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
@@ -177,6 +196,46 @@ hr.divider {
 .modal-actions .btn {
   flex: 1;
 }
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.modal-label {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.modal-input--sm {
+  font-size: var(--text-base);
+}
+
+/* Position chips in modal */
+.modal-position-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+.pos-chip {
+  height: 34px;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.pos-chip.pos-tank:hover { border-color: #4A7EC7; color: #4A7EC7; }
+.pos-chip.pos-heal:hover { border-color: #4AAF6E; color: #4AAF6E; }
+.pos-chip.pos-dps:hover  { border-color: #C94040; color: #C94040; }
+
+.pos-chip.selected.pos-tank { background: rgba(74,126,199,0.2); border-color: #4A7EC7; color: #4A7EC7; }
+.pos-chip.selected.pos-heal { background: rgba(74,175,110,0.2); border-color: #4AAF6E; color: #4AAF6E; }
+.pos-chip.selected.pos-dps  { background: rgba(201,64,64,0.2);  border-color: #C94040; color: #C94040; }
 
 .fill-status__label {
   display: flex;
