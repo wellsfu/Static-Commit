@@ -121,6 +121,13 @@ hr.divider {
   border-color: var(--primary-light);
 }
 
+@media (hover: hover) {
+  .member-edit-btn {
+    opacity: 0.55;
+    color: var(--primary);
+    border-color: rgba(123, 108, 246, 0.4);
+  }
+}
 @media (hover: none) {
   .member-edit-btn {
     opacity: 0.5;
