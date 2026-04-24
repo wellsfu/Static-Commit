@@ -303,9 +303,11 @@ function formatDayState(s) {
 }
 
 // --- Init ---
-grid.innerHTML = '<div class="loading-center"><div class="spinner"></div></div>';
+renderMembers(new Set());
 
 getMemberProfiles().then(p => {
   profiles = p;
-  watchWeekStatus(weekId, updateStatus);
+  renderMembers(currentFilledSet);
 });
+
+watchWeekStatus(weekId, updateStatus);

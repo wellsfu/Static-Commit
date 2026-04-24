@@ -18,10 +18,12 @@ if (!memberId || !MEMBERS.find(m => m.id === memberId)) {
 
 document.querySelector('.fill-nav__back').href = `index.html?week=${weekId}`;
 
+const member = MEMBERS.find(m => m.id === memberId);
+document.getElementById('memberName').textContent = `${member?.name ?? memberId} 的出團時間`;
+
 let allProfiles = {};
 getMemberProfiles().then(profiles => {
   allProfiles = profiles;
-  const member = MEMBERS.find(m => m.id === memberId);
   const name = profiles[memberId]?.displayName ?? member?.name ?? memberId;
   document.getElementById('memberName').textContent = `${name} 的出團時間`;
 });

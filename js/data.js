@@ -1,10 +1,19 @@
 import { db } from './firebase.js';
 import {
-  doc, setDoc, addDoc, collection, getDocs, onSnapshot, serverTimestamp, query, orderBy
+  doc, setDoc, addDoc, collection, getDocs, getDocsFromCache, onSnapshot, serverTimestamp, query, orderBy
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 export async function getMemberProfiles() {
-  const snap = await getDocs(collection(db, 'members'));
+  const ref = collection(db, 'members');
+  try {
+    const cached = await getDocsFromCache(ref);
+    if (!cached.empty) {
+      const result = {};
+      cached.forEach(d => { result[d.id] = d.data(); });
+      return result;
+    }
+  } catch (e) { /* cache miss on first visit */ }
+  const snap = await getDocs(ref);
   const result = {};
   snap.forEach(d => { result[d.id] = d.data(); });
   return result;
@@ -20,6 +29,14 @@ export async function saveMemberProfile(memberId, profileData) {
 
 export async function getMemberWeekData(weekId, memberId) {
   const daysRef = collection(db, 'weeks', weekId, 'members', memberId, 'days');
+  try {
+    const cached = await getDocsFromCache(daysRef);
+    if (!cached.empty) {
+      const result = {};
+      cached.forEach(d => { result[d.id] = d.data(); });
+      return result;
+    }
+  } catch (e) { /* cache miss on first visit */ }
   const snapshot = await getDocs(daysRef);
   const result = {};
   snapshot.forEach(d => { result[d.id] = d.data(); });
