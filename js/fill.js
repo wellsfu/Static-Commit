@@ -42,8 +42,8 @@ const xianKey  = `xianMode_${memberId}`;
 let   xianMode = localStorage.getItem(xianKey) === 'true';
 const NIGHT_IDS = new Set(['night', 'late']);
 
-function visibleSlots() {
-  return xianMode ? PRESET_SLOTS : PRESET_SLOTS.filter(p => NIGHT_IDS.has(p.id));
+function visibleSlots(isWeekend = false) {
+  return (xianMode || isWeekend) ? PRESET_SLOTS : PRESET_SLOTS.filter(p => NIGHT_IDS.has(p.id));
 }
 
 function applyMemberData(saved) {
@@ -115,7 +115,7 @@ function buildDayCard(date, ds, dayIdx) {
   article.id = `day-${ds}`;
   article.dataset.date = ds;
 
-  const slots = visibleSlots();
+  const slots = visibleSlots(dayIdx >= 5);
 
   article.innerHTML = `
     <div class="day-card__header">
