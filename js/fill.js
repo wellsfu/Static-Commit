@@ -58,18 +58,20 @@ async function init() {
 function renderAll() {
   const container = document.getElementById('dayCardsContainer');
   container.innerHTML = '';
-  weekDates.forEach(d => {
+  weekDates.forEach((d, idx) => {
     const ds = formatDateISO(d);
-    container.appendChild(buildDayCard(d, ds));
+    container.appendChild(buildDayCard(d, ds, idx));
   });
   updateProgressDots();
   updateSubmitWarning();
 }
 
-function buildDayCard(date, ds) {
+function buildDayCard(date, ds, dayIdx) {
   const s = state[ds];
   const article = document.createElement('article');
   article.className = 'day-card';
+  if (dayIdx === 4) article.classList.add('day-card--friday');
+  if (dayIdx >= 5)  article.classList.add('day-card--weekend');
   article.id = `day-${ds}`;
   article.dataset.date = ds;
 

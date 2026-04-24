@@ -60,6 +60,20 @@
   overflow: hidden;
 }
 
+.day-card--friday {
+  border-left: 3px solid #C084FC;
+}
+.day-card--friday .day-card__title {
+  color: #C084FC;
+}
+
+.day-card--weekend {
+  border-left: 3px solid #FBBF24;
+}
+.day-card--weekend .day-card__title {
+  color: #FBBF24;
+}
+
 .day-card__header {
   display: flex;
   align-items: center;
