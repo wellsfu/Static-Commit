@@ -10,10 +10,11 @@ export const MEMBERS = [
 ];
 
 export const PRESET_SLOTS = [
-  { id: 'afternoon', label: '下午場', sub: '13–18時', start: '13:00', end: '18:00' },
-  { id: 'evening',   label: '傍晚場', sub: '18–20時', start: '18:00', end: '20:00' },
-  { id: 'night',     label: '晚間場', sub: '20–24時', start: '20:00', end: '24:00' },
-  { id: 'late',      label: '深夜場', sub: '24–26時', start: '24:00', end: '26:00' },
+  { id: 'early_pm',  label: '午後場', sub: '13–15時', start: '13:00', end: '15:00' },
+  { id: 'afternoon', label: '下午場', sub: '15–17時', start: '15:00', end: '17:00' },
+  { id: 'evening',   label: '傍晚場', sub: '17–19時', start: '17:00', end: '19:00' },
+  { id: 'night',     label: '晚間場', sub: '20–22時', start: '20:00', end: '22:00' },
+  { id: 'late',      label: '深夜場', sub: '22–24時', start: '22:00', end: '24:00' },
 ];
 
 export const TIME_MIN  = 6 * 60;

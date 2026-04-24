@@ -51,11 +51,12 @@ watchWeekStatus(weekId, filledIds => {
 });
 
 function heatColor(count) {
-  if (count === 0) return 'var(--heat-0)';
-  if (count <= 2)  return 'var(--heat-1)';
-  if (count <= 4)  return 'var(--heat-2)';
-  if (count <= 6)  return 'var(--heat-3)';
-  return 'var(--heat-4)';
+  if (count === 0)            return 'var(--heat-0)';
+  if (count <= 2)             return 'var(--heat-1)';
+  if (count <= 4)             return 'var(--heat-2)';
+  if (count <= 6)             return 'var(--heat-3)';
+  if (count < MEMBERS.length) return 'var(--heat-4)';
+  return 'var(--heat-full)';
 }
 
 function countAvailableAt(fullData, dateStr, minutePoint) {
@@ -113,6 +114,8 @@ function renderHeatmap(fullData) {
     const ds = formatDateISO(date);
     const row = document.createElement('div');
     row.className = 'heatmap-row';
+    if (rowIdx === 4) row.classList.add('heatmap-row--friday');
+    if (rowIdx >= 5)  row.classList.add('heatmap-row--weekend');
 
     const dayLabel = document.createElement('div');
     dayLabel.className = 'heatmap-day-label';
@@ -151,11 +154,12 @@ function renderHeatmap(fullData) {
   const legend = document.createElement('div');
   legend.className = 'heatmap-legend';
   [
-    { color: 'var(--heat-4)', label: '7–8人' },
-    { color: 'var(--heat-3)', label: '5–6人' },
-    { color: 'var(--heat-2)', label: '3–4人' },
-    { color: 'var(--heat-1)', label: '1–2人' },
-    { color: 'var(--heat-0)', label: '0人' },
+    { color: 'var(--heat-full)', label: `全員 (${MEMBERS.length}人)` },
+    { color: 'var(--heat-4)',    label: `${MEMBERS.length - 1}人` },
+    { color: 'var(--heat-3)',    label: '5–6人' },
+    { color: 'var(--heat-2)',    label: '3–4人' },
+    { color: 'var(--heat-1)',    label: '1–2人' },
+    { color: 'var(--heat-0)',    label: '0人' },
   ].forEach(({ color, label }) => {
     legend.innerHTML += `
       <div class="heatmap-legend-item">
@@ -195,6 +199,40 @@ function hideDetail() {
   panel.classList.add('hidden');
 }
 
+function renderFullSlots(fullData) {
+  const section = document.getElementById('fullSlotsSection');
+  const list    = document.getElementById('fullSlotsList');
+
+  const fullSlots = [];
+  weekDates.forEach((date, rowIdx) => {
+    const ds = formatDateISO(date);
+    let rangeStart = null;
+
+    for (let col = 0; col <= COLS; col++) {
+      const t     = TIME_START + col * CELL_MIN;
+      const count = col < COLS ? countAvailableAt(fullData, ds, t) : 0;
+
+      if (count === MEMBERS.length) {
+        if (rangeStart === null) rangeStart = t;
+      } else {
+        if (rangeStart !== null) {
+          fullSlots.push({ dayName: DAY_NAMES[rowIdx], start: rangeStart, end: t });
+          rangeStart = null;
+        }
+      }
+    }
+  });
+
+  if (fullSlots.length === 0) {
+    section.classList.add('hidden');
+    return;
+  }
+  section.classList.remove('hidden');
+  list.innerHTML = fullSlots.map(s =>
+    `<div class="full-slot-item">${s.dayName}&nbsp;&nbsp;${minutesToDisplay(s.start)} – ${minutesToDisplay(s.end)}</div>`
+  ).join('');
+}
+
 async function init() {
   const wrapper = document.getElementById('heatmapWrapper');
   wrapper.innerHTML = '<div class="loading-center"><div class="spinner spinner--lg"></div><span>載入中…</span></div>';
@@ -206,6 +244,7 @@ async function init() {
       return;
     }
     renderHeatmap(fullData);
+    renderFullSlots(fullData);
   } catch (e) {
     console.error(e);
     wrapper.innerHTML = '<p class="empty-hint">載入失敗，請重新整理頁面</p>';
