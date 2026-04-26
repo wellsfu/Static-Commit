@@ -37,6 +37,44 @@ document.getElementById('nextWeek').addEventListener('click', () => {
 let memberProfiles = {};
 getMemberProfiles().then(p => { memberProfiles = p; });
 
+const enabledMembers = new Set(MEMBERS.map(m => m.id));
+let cachedFullData = null;
+
+const HEAT_PALETTE = [
+  'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)', 'var(--heat-full)',
+];
+
+function renderMemberFilter() {
+  const container = document.getElementById('memberFilter');
+  container.innerHTML = '';
+  MEMBERS.forEach((m, i) => {
+    const chip = document.createElement('button');
+    chip.className = 'member-chip';
+
+    const dot = document.createElement('span');
+    dot.className = 'member-chip__dot';
+    dot.style.background = HEAT_PALETTE[i % HEAT_PALETTE.length];
+    chip.appendChild(dot);
+    chip.appendChild(document.createTextNode(m.name));
+
+    chip.addEventListener('click', () => {
+      if (enabledMembers.has(m.id)) {
+        if (enabledMembers.size === 1) return; // keep at least 1 enabled
+        enabledMembers.delete(m.id);
+        chip.classList.add('member-chip--off');
+      } else {
+        enabledMembers.add(m.id);
+        chip.classList.remove('member-chip--off');
+      }
+      activeCell = null;
+      hideDetail();
+      if (cachedFullData) renderHeatmap(cachedFullData);
+    });
+
+    container.appendChild(chip);
+  });
+}
+
 function displayName(m) {
   return memberProfiles[m.id]?.displayName ?? m.name;
 }
@@ -51,17 +89,19 @@ watchWeekStatus(weekId, filledIds => {
 });
 
 function heatColor(count) {
-  if (count === 0)            return 'var(--heat-0)';
-  if (count <= 2)             return 'var(--heat-1)';
-  if (count <= 4)             return 'var(--heat-2)';
-  if (count <= 6)             return 'var(--heat-3)';
-  if (count < MEMBERS.length) return 'var(--heat-4)';
+  const total = enabledMembers.size;
+  if (count === 0)       return 'var(--heat-0)';
+  if (count <= 2)        return 'var(--heat-1)';
+  if (count <= 4)        return 'var(--heat-2)';
+  if (count <= 6)        return 'var(--heat-3)';
+  if (count < total)     return 'var(--heat-4)';
   return 'var(--heat-full)';
 }
 
 function countAvailableAt(fullData, dateStr, minutePoint) {
   let count = 0;
   for (const m of MEMBERS) {
+    if (!enabledMembers.has(m.id)) continue;
     const dayData = fullData[m.id]?.[dateStr];
     if (!dayData || dayData.unavailable) continue;
     for (const slot of (dayData.slots || [])) {
@@ -151,11 +191,12 @@ function renderHeatmap(fullData) {
   });
 
   // Legend
+  const total = enabledMembers.size;
   const legend = document.createElement('div');
   legend.className = 'heatmap-legend';
   [
-    { color: 'var(--heat-full)', label: `全員 (${MEMBERS.length}人)` },
-    { color: 'var(--heat-4)',    label: `${MEMBERS.length - 1}人` },
+    { color: 'var(--heat-full)', label: `全員 (${total}人)` },
+    { color: 'var(--heat-4)',    label: `${total - 1}人` },
     { color: 'var(--heat-3)',    label: '5–6人' },
     { color: 'var(--heat-2)',    label: '3–4人' },
     { color: 'var(--heat-1)',    label: '1–2人' },
@@ -243,6 +284,8 @@ async function init() {
       wrapper.innerHTML = '<p class="empty-hint">本週尚無人填寫</p>';
       return;
     }
+    cachedFullData = fullData;
+    renderMemberFilter();
     renderHeatmap(fullData);
     renderFullSlots(fullData);
   } catch (e) {

@@ -35,6 +35,42 @@
   margin-bottom: var(--space-4);
 }
 
+.member-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: 0 var(--space-4) var(--space-3);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: var(--text-xs);
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: opacity var(--transition-fast), border-color var(--transition-fast);
+  user-select: none;
+}
+
+.member-chip--off {
+  opacity: 0.35;
+  border-color: transparent;
+}
+
+.member-chip__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .heatmap-section {
   padding: 0 var(--space-4);
   max-width: 100%;
