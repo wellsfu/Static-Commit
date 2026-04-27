@@ -59,7 +59,10 @@ function renderMemberFilter() {
       }
       activeCell = null;
       hideDetail();
-      if (cachedFullData) renderHeatmap(cachedFullData);
+      if (cachedFullData) {
+        renderHeatmap(cachedFullData);
+        renderFullSlots(cachedFullData);
+      }
     });
 
     container.appendChild(chip);
@@ -231,42 +234,132 @@ function hideDetail() {
   panel.classList.add('hidden');
 }
 
+function combinations(arr, k) {
+  if (k === 0) return [[]];
+  if (k > arr.length) return [];
+  if (k === arr.length) return [arr.slice()];
+  const [first, ...rest] = arr;
+  return [
+    ...combinations(rest, k - 1).map(c => [first, ...c]),
+    ...combinations(rest, k),
+  ];
+}
+
+function findSlotsForMemberIds(fullData, memberIds) {
+  const slots = [];
+  weekDates.forEach((date, rowIdx) => {
+    const ds = formatDateISO(date);
+    let rangeStart = null;
+    for (let col = 0; col <= COLS; col++) {
+      const t = TIME_START + col * CELL_MIN;
+      const allAvail = col < COLS && memberIds.every(id => {
+        const dayData = fullData[id]?.[ds];
+        if (!dayData || dayData.unavailable) return false;
+        return (dayData.slots || []).some(s =>
+          t >= timeToMinutes(s.start) && t < timeToMinutes(s.end)
+        );
+      });
+      if (allAvail) {
+        if (rangeStart === null) rangeStart = t;
+      } else if (rangeStart !== null) {
+        slots.push({ dayName: DAY_NAMES[rowIdx], date: ds, start: rangeStart, end: t });
+        rangeStart = null;
+      }
+    }
+  });
+  return slots;
+}
+
+function findBestCombo(fullData, count) {
+  const presentMembers = MEMBERS.filter(m => enabledMembers.has(m.id));
+  let bestMembers = [], bestSlots = [], bestMin = -1;
+  for (const combo of combinations(presentMembers, count)) {
+    const ids   = combo.map(m => m.id);
+    const slots = findSlotsForMemberIds(fullData, ids);
+    const mins  = slots.reduce((a, s) => a + s.end - s.start, 0);
+    if (mins > bestMin) { bestMin = mins; bestMembers = combo; bestSlots = slots; }
+  }
+  return { members: bestMembers, slots: bestSlots };
+}
+
+function addToCovered(slots, coveredSet) {
+  for (const s of slots)
+    for (let t = s.start; t < s.end; t += CELL_MIN)
+      coveredSet.add(`${s.date}:${t}`);
+}
+
+function subtractCovered(slots, coveredSet) {
+  const result = [];
+  for (const s of slots) {
+    let rangeStart = null;
+    for (let t = s.start; t <= s.end; t += CELL_MIN) {
+      const isNew = t < s.end && !coveredSet.has(`${s.date}:${t}`);
+      if (isNew) {
+        if (rangeStart === null) rangeStart = t;
+      } else if (rangeStart !== null) {
+        result.push({ dayName: s.dayName, date: s.date, start: rangeStart, end: t });
+        rangeStart = null;
+      }
+    }
+  }
+  return result;
+}
+
 function renderFullSlots(fullData) {
   const section = document.getElementById('fullSlotsSection');
   const list    = document.getElementById('fullSlotsList');
 
-  const fullSlots = [];
-  const presentCount = enabledMembers.size;
-  const absentCount  = MEMBERS.length - presentCount;
-  document.getElementById('fullSlotsTitle').textContent =
-    absentCount > 0 ? `出席成員可出團時段（${presentCount}人）` : '全員可出團時段';
-  weekDates.forEach((date, rowIdx) => {
-    const ds = formatDateISO(date);
-    let rangeStart = null;
+  const presentMembers = MEMBERS.filter(m => enabledMembers.has(m.id));
+  const n = presentMembers.length;
+  document.getElementById('fullSlotsTitle').textContent = '可出團時段';
 
-    for (let col = 0; col <= COLS; col++) {
-      const t     = TIME_START + col * CELL_MIN;
-      const count = col < COLS ? countAvailableAt(fullData, ds, t) : 0;
+  const covered = new Set();
+  const tiers   = [];
 
-      if (count === presentCount) {
-        if (rangeStart === null) rangeStart = t;
-      } else {
-        if (rangeStart !== null) {
-          fullSlots.push({ dayName: DAY_NAMES[rowIdx], start: rangeStart, end: t });
-          rangeStart = null;
-        }
-      }
+  // Tier 1: all present members
+  const tier1Slots = findSlotsForMemberIds(fullData, presentMembers.map(m => m.id));
+  if (tier1Slots.length > 0) {
+    tiers.push({ label: `全員 ${n} 人`, members: null, slots: tier1Slots, t: 1 });
+    addToCovered(tier1Slots, covered);
+  }
+
+  // Tier 2: best N-1 combo
+  if (n >= 2) {
+    const { members, slots } = findBestCombo(fullData, n - 1);
+    const newSlots = subtractCovered(slots, covered);
+    if (newSlots.length > 0) {
+      tiers.push({ label: `最佳 ${n - 1} 人`, members, slots: newSlots, t: 2 });
+      addToCovered(newSlots, covered);
     }
-  });
+  }
 
-  if (fullSlots.length === 0) {
+  // Tier 3: best N-2 combo
+  if (n >= 3) {
+    const { members, slots } = findBestCombo(fullData, n - 2);
+    const newSlots = subtractCovered(slots, covered);
+    if (newSlots.length > 0) {
+      tiers.push({ label: `最佳 ${n - 2} 人`, members, slots: newSlots, t: 3 });
+    }
+  }
+
+  if (tiers.length === 0) {
     section.classList.add('hidden');
     return;
   }
   section.classList.remove('hidden');
-  list.innerHTML = fullSlots.map(s =>
-    `<div class="full-slot-item">${s.dayName}&nbsp;&nbsp;${minutesToDisplay(s.start)} – ${minutesToDisplay(s.end)}</div>`
-  ).join('');
+
+  list.innerHTML = tiers.map(({ label, members, slots, t }) => {
+    const memberLine = members
+      ? `<span class="full-slot-tier-members">${members.map(m => displayName(m)).join('、')}</span>`
+      : '';
+    const items = slots.map(s =>
+      `<div class="full-slot-item full-slot-item--t${t}">${s.dayName}&nbsp;&nbsp;${minutesToDisplay(s.start)} – ${minutesToDisplay(s.end)}</div>`
+    ).join('');
+    return `<div class="full-slot-tier">
+      <div class="full-slot-tier-header full-slot-tier-header--t${t}">${label}${memberLine}</div>
+      ${items}
+    </div>`;
+  }).join('');
 }
 
 async function init() {
