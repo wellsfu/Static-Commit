@@ -73,11 +73,11 @@ function displayName(m) {
   return memberProfiles[m.id]?.displayName ?? m.name;
 }
 
-watchWeekStatus(weekId, filledIds => {
-  const filledSet = new Set(filledIds);
+watchWeekStatus(weekId, members => {
+  const filledSet = new Set(members.map(m => m.id));
   const missing = MEMBERS.filter(m => !filledSet.has(m.id)).map(m => displayName(m));
   document.getElementById('overviewFillCount').textContent =
-    `已填：${filledIds.length} / ${MEMBERS.length}`;
+    `已填：${members.length} / ${MEMBERS.length}`;
   document.getElementById('overviewMissing').textContent =
     missing.length > 0 ? `未填：${missing.join('、')}` : '';
 });
