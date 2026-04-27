@@ -282,28 +282,6 @@ function findBestCombo(fullData, count) {
   return { members: bestMembers, slots: bestSlots };
 }
 
-function addToCovered(slots, coveredSet) {
-  for (const s of slots)
-    for (let t = s.start; t < s.end; t += CELL_MIN)
-      coveredSet.add(`${s.date}:${t}`);
-}
-
-function subtractCovered(slots, coveredSet) {
-  const result = [];
-  for (const s of slots) {
-    let rangeStart = null;
-    for (let t = s.start; t <= s.end; t += CELL_MIN) {
-      const isNew = t < s.end && !coveredSet.has(`${s.date}:${t}`);
-      if (isNew) {
-        if (rangeStart === null) rangeStart = t;
-      } else if (rangeStart !== null) {
-        result.push({ dayName: s.dayName, date: s.date, start: rangeStart, end: t });
-        rangeStart = null;
-      }
-    }
-  }
-  return result;
-}
 
 function renderFullSlots(fullData) {
   const section = document.getElementById('fullSlotsSection');
@@ -313,32 +291,27 @@ function renderFullSlots(fullData) {
   const n = presentMembers.length;
   document.getElementById('fullSlotsTitle').textContent = '可出團時段';
 
-  const covered = new Set();
-  const tiers   = [];
+  const tiers = [];
 
   // Tier 1: all present members
   const tier1Slots = findSlotsForMemberIds(fullData, presentMembers.map(m => m.id));
   if (tier1Slots.length > 0) {
     tiers.push({ label: `全員 ${n} 人`, members: null, slots: tier1Slots, t: 1 });
-    addToCovered(tier1Slots, covered);
   }
 
-  // Tier 2: best N-1 combo
+  // Tier 2: best N-1 combo (show all slots including those overlapping tier 1)
   if (n >= 2) {
     const { members, slots } = findBestCombo(fullData, n - 1);
-    const newSlots = subtractCovered(slots, covered);
-    if (newSlots.length > 0) {
-      tiers.push({ label: `最佳 ${n - 1} 人`, members, slots: newSlots, t: 2 });
-      addToCovered(newSlots, covered);
+    if (slots.length > 0) {
+      tiers.push({ label: `最佳 ${n - 1} 人`, members, slots, t: 2 });
     }
   }
 
-  // Tier 3: best N-2 combo
+  // Tier 3: best N-2 combo (show all slots including those overlapping tier 1/2)
   if (n >= 3) {
     const { members, slots } = findBestCombo(fullData, n - 2);
-    const newSlots = subtractCovered(slots, covered);
-    if (newSlots.length > 0) {
-      tiers.push({ label: `最佳 ${n - 2} 人`, members, slots: newSlots, t: 3 });
+    if (slots.length > 0) {
+      tiers.push({ label: `最佳 ${n - 2} 人`, members, slots, t: 3 });
     }
   }
 
