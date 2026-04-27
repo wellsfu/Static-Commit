@@ -303,7 +303,7 @@ function renderFullSlots(fullData) {
   if (n >= 2) {
     const { members, slots } = findBestCombo(fullData, n - 1);
     if (slots.length > 0) {
-      tiers.push({ label: `最佳 ${n - 1} 人`, members, slots, t: 2 });
+      tiers.push({ label: `${n - 1}最多出團時段:`, members, slots, t: 2 });
     }
   }
 
@@ -311,7 +311,7 @@ function renderFullSlots(fullData) {
   if (n >= 3) {
     const { members, slots } = findBestCombo(fullData, n - 2);
     if (slots.length > 0) {
-      tiers.push({ label: `最佳 ${n - 2} 人`, members, slots, t: 3 });
+      tiers.push({ label: `${n - 2}最多出團時段:`, members, slots, t: 3 });
     }
   }
 
