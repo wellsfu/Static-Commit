@@ -75,9 +75,18 @@ export async function getWeekLogs(weekId) {
 export function watchWeekStatus(weekId, callback) {
   const membersRef = collection(db, 'weeks', weekId, 'members');
   return onSnapshot(membersRef, snapshot => {
-    const filled = snapshot.docs.map(d => d.id);
-    callback(filled);
+    callback(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
   });
+}
+
+export function watchWeekNote(weekId, callback) {
+  return onSnapshot(doc(db, 'weeks', weekId), snap => {
+    callback(snap.data()?.note ?? '');
+  });
+}
+
+export async function saveWeekNote(weekId, note) {
+  await setDoc(doc(db, 'weeks', weekId), { note }, { merge: true });
 }
 
 export async function addMessage(memberId, text) {

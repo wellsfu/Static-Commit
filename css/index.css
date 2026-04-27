@@ -91,6 +91,12 @@ hr.divider {
   line-height: 1;
 }
 
+.member-btn__updated {
+  font-size: 10px;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
 .member-edit-btn {
   position: absolute;
   bottom: 6px;
@@ -361,6 +367,60 @@ hr.divider {
 .log-diff__date:first-child { margin-top: 0; }
 .log-diff__added   { color: var(--success); }
 .log-diff__removed { color: var(--text-danger); }
+
+/* Week Note */
+.week-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  min-height: 40px;
+  cursor: pointer;
+  transition: border-color var(--transition-fast);
+}
+.week-note:hover { border-color: var(--primary-dim); }
+.week-note.editing { cursor: default; border-color: var(--primary); }
+
+.week-note__icon { font-size: 14px; flex-shrink: 0; }
+
+.week-note__text {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.week-note__text--empty { color: var(--text-muted); }
+
+.week-note__input {
+  display: none;
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--text-primary);
+  min-width: 0;
+}
+.week-note.editing .week-note__text  { display: none; }
+.week-note.editing .week-note__input { display: block; }
+.week-note.editing .week-note__edit  { display: none; }
+
+.week-note__edit {
+  font-size: 12px;
+  color: var(--text-muted);
+  opacity: 0.25;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+  padding: var(--space-1);
+}
+.week-note:hover .week-note__edit { opacity: 1; color: var(--primary); }
 
 /* Message Board */
 .board-messages {

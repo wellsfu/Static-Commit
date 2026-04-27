@@ -47,6 +47,16 @@
       <p class="fill-status__missing" id="missingMembers"></p>
     </section>
 
+    <section class="section" style="padding-top: 0; padding-bottom: var(--space-3)">
+      <div class="week-note" id="weekNote" title="點擊編輯公告">
+        <span class="week-note__icon">📌</span>
+        <span class="week-note__text week-note__text--empty" id="weekNoteText">點此新增本週公告…</span>
+        <input class="week-note__input" id="weekNoteInput" type="text" maxlength="80"
+               autocomplete="off" placeholder="例：週三 20:00 出發">
+        <button class="week-note__edit" id="weekNoteEdit" title="編輯公告">✏</button>
+      </div>
+    </section>
+
     <section class="section" style="padding-top: 0">
       <a href="overview.html" class="btn btn--outline btn--full" id="overviewLink">
         📊 查看本週總覽

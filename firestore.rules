@@ -1,6 +1,10 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /weeks/{weekId} {
+      allow read: if true;
+      allow write: if true;
+    }
     match /weeks/{weekId}/{document=**} {
       allow read: if true;
       allow write: if true;

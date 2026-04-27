@@ -1,6 +1,6 @@
 import { MEMBERS } from './constants.js';
 import { getWeekId, getWeekDates, getWeekLabel, shiftWeek } from './utils.js';
-import { watchWeekStatus, getMemberProfiles, saveMemberProfile, addLog, getWeekLogs, addMessage, watchMessages, deleteMessage } from './data.js';
+import { watchWeekStatus, getMemberProfiles, saveMemberProfile, addLog, getWeekLogs, addMessage, watchMessages, deleteMessage, watchWeekNote, saveWeekNote } from './data.js';
 
 const params    = new URLSearchParams(location.search);
 const weekId    = params.get('week') || getWeekId();
@@ -45,6 +45,7 @@ document.getElementById('nextWeek').addEventListener('click', () => {
 const grid = document.getElementById('memberGrid');
 let profiles = {};
 let currentFilledSet = new Set();
+let currentUpdatedMap = {};
 let editingId      = null;
 let selectedPosition = '';
 let beforeProfile  = null;
@@ -157,14 +158,17 @@ function displayName(m) {
   return profiles[m.id]?.displayName ?? m.name;
 }
 
-function renderMembers(filledSet) {
+function renderMembers(filledSet, updatedMap = {}) {
   currentFilledSet = filledSet;
+  currentUpdatedMap = updatedMap;
   grid.innerHTML = '';
   MEMBERS.forEach(m => {
     const isFilled = filledSet.has(m.id);
     const profile  = profiles[m.id] ?? {};
     const pos      = profile.position ?? '';
     const job      = profile.job ?? m.role ?? '';
+    const ts       = updatedMap[m.id];
+    const timeHint = isFilled && ts ? relativeTime(ts) : null;
 
     const item = document.createElement('div');
     item.className = 'member-item';
@@ -176,6 +180,7 @@ function renderMembers(filledSet) {
       ${pos ? `<span class="member-pos-badge ${posClass(pos)}">${pos}</span>` : ''}
       <span class="member-btn__name">${displayName(m)}</span>
       ${job ? `<span class="member-btn__role">${job}</span>` : ''}
+      ${timeHint ? `<span class="member-btn__updated">${timeHint}</span>` : ''}
       ${isFilled ? '<span class="member-btn__badge">✅</span>' : ''}
     `;
 
@@ -195,11 +200,13 @@ function renderMembers(filledSet) {
   });
 }
 
-function updateStatus(filledIds) {
-  const filledSet = new Set(filledIds);
-  renderMembers(filledSet);
+function updateStatus(members) {
+  const filledSet  = new Set(members.map(m => m.id));
+  const updatedMap = {};
+  members.forEach(m => { if (m.updatedAt) updatedMap[m.id] = m.updatedAt.toDate(); });
+  renderMembers(filledSet, updatedMap);
 
-  const count = filledIds.length;
+  const count = members.length;
   const total = MEMBERS.length;
   document.getElementById('fillCount').textContent = `${count} / ${total} 人`;
   document.getElementById('progressFill').style.width = `${(count / total) * 100}%`;
@@ -302,6 +309,48 @@ function formatDayState(s) {
   return s.slots.map(sl => `${sl.start}–${sl.end}`).join('、');
 }
 
+// --- Week Note ---
+const weekNoteEl    = document.getElementById('weekNote');
+const weekNoteText  = document.getElementById('weekNoteText');
+const weekNoteInput = document.getElementById('weekNoteInput');
+
+let currentNote = '';
+
+function enterNoteEdit() {
+  weekNoteEl.classList.add('editing');
+  weekNoteInput.value = currentNote;
+  weekNoteInput.focus();
+  weekNoteInput.select();
+}
+
+function exitNoteEdit(save) {
+  if (!weekNoteEl.classList.contains('editing')) return;
+  weekNoteEl.classList.remove('editing');
+  if (save) {
+    currentNote = weekNoteInput.value.trim();
+    saveWeekNote(weekId, currentNote).catch(() => {});
+  }
+  weekNoteText.textContent = currentNote || '點此新增本週公告…';
+  weekNoteText.classList.toggle('week-note__text--empty', !currentNote);
+}
+
+weekNoteEl.addEventListener('click', () => {
+  if (!weekNoteEl.classList.contains('editing')) enterNoteEdit();
+});
+weekNoteInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter')  { e.preventDefault(); exitNoteEdit(true); }
+  if (e.key === 'Escape') { exitNoteEdit(false); }
+});
+weekNoteInput.addEventListener('blur', () => exitNoteEdit(true));
+
+watchWeekNote(weekId, note => {
+  currentNote = note;
+  if (!weekNoteEl.classList.contains('editing')) {
+    weekNoteText.textContent = note || '點此新增本週公告…';
+    weekNoteText.classList.toggle('week-note__text--empty', !note);
+  }
+});
+
 // --- Message Board ---
 const CHAT_KEY = 'sc_chat_member';
 
@@ -330,11 +379,11 @@ function relativeTime(date) {
   if (mins < 60) return `${mins}分鐘前`;
   const hrs = Math.floor(mins / 60);
   if (hrs < 24)  return `${hrs}小時前`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7)  return `${days}天前`;
   const mo = String(date.getMonth() + 1).padStart(2, '0');
   const d  = String(date.getDate()).padStart(2, '0');
-  const h  = String(date.getHours()).padStart(2, '0');
-  const mi = String(date.getMinutes()).padStart(2, '0');
-  return `${mo}/${d} ${h}:${mi}`;
+  return `${mo}/${d}`;
 }
 
 function escapeHtml(s) {
@@ -403,7 +452,7 @@ renderMembers(new Set());
 
 getMemberProfiles().then(p => {
   profiles = p;
-  renderMembers(currentFilledSet);
+  renderMembers(currentFilledSet, currentUpdatedMap);
   if (latestMessages.length) renderMessages(latestMessages);
 });
 
