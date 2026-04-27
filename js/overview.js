@@ -40,21 +40,12 @@ getMemberProfiles().then(p => { memberProfiles = p; });
 const enabledMembers = new Set(MEMBERS.map(m => m.id));
 let cachedFullData = null;
 
-const HEAT_PALETTE = [
-  'var(--heat-1)', 'var(--heat-2)', 'var(--heat-3)', 'var(--heat-4)', 'var(--heat-full)',
-];
-
 function renderMemberFilter() {
   const container = document.getElementById('memberFilter');
   container.innerHTML = '';
-  MEMBERS.forEach((m, i) => {
+  MEMBERS.forEach(m => {
     const chip = document.createElement('button');
     chip.className = 'member-chip';
-
-    const dot = document.createElement('span');
-    dot.className = 'member-chip__dot';
-    dot.style.background = HEAT_PALETTE[i % HEAT_PALETTE.length];
-    chip.appendChild(dot);
     chip.appendChild(document.createTextNode(m.name));
 
     chip.addEventListener('click', () => {
@@ -245,6 +236,10 @@ function renderFullSlots(fullData) {
   const list    = document.getElementById('fullSlotsList');
 
   const fullSlots = [];
+  const presentCount = enabledMembers.size;
+  const absentCount  = MEMBERS.length - presentCount;
+  document.getElementById('fullSlotsTitle').textContent =
+    absentCount > 0 ? `出席成員可出團時段（${presentCount}人）` : '全員可出團時段';
   weekDates.forEach((date, rowIdx) => {
     const ds = formatDateISO(date);
     let rangeStart = null;
@@ -253,7 +248,7 @@ function renderFullSlots(fullData) {
       const t     = TIME_START + col * CELL_MIN;
       const count = col < COLS ? countAvailableAt(fullData, ds, t) : 0;
 
-      if (count === MEMBERS.length) {
+      if (count === presentCount) {
         if (rangeStart === null) rangeStart = t;
       } else {
         if (rangeStart !== null) {
