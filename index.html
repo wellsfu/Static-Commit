@@ -52,6 +52,25 @@
         📊 查看本週總覽
       </a>
     </section>
+
+    <hr class="divider">
+
+    <section class="section">
+      <h2 class="section-label">廢話留言板</h2>
+      <div class="board-messages" id="boardMessages">
+        <div class="board-empty">載入中…</div>
+      </div>
+      <div class="board-compose">
+        <div class="board-input-row">
+          <select class="board-who" id="boardWho">
+            <option value="">我是…</option>
+          </select>
+          <input class="board-input" id="boardInput" type="text" maxlength="200"
+                 placeholder="說點什麼…" autocomplete="off">
+          <button class="btn btn--primary board-send" id="boardSend">送</button>
+        </div>
+      </div>
+    </section>
   </main>
 
   <div class="modal-overlay hidden" id="nicknameModal">

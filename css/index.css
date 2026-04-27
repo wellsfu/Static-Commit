@@ -361,3 +361,123 @@ hr.divider {
 .log-diff__date:first-child { margin-top: 0; }
 .log-diff__added   { color: var(--success); }
 .log-diff__removed { color: var(--text-danger); }
+
+/* Message Board */
+.board-messages {
+  max-height: 300px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.board-empty {
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  padding: var(--space-6) 0;
+}
+
+.board-msg {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+.board-msg--own {
+  border-color: var(--primary-dim);
+}
+
+.board-msg__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: 4px;
+}
+
+.board-msg__name {
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--primary-light);
+}
+
+.board-msg__time {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  flex: 1;
+}
+
+.board-msg__del {
+  font-size: 18px;
+  color: var(--text-muted);
+  line-height: 1;
+  padding: 0 var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+.board-msg:hover .board-msg__del { opacity: 1; }
+.board-msg__del:hover { color: var(--danger); }
+
+@media (hover: none) {
+  .board-msg__del { opacity: 0.5; }
+}
+
+.board-msg__text {
+  font-size: var(--text-sm);
+  color: var(--text-primary);
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+
+.board-compose {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.board-input-row {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.board-who {
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-2);
+  height: 44px;
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--text-primary);
+  flex-shrink: 0;
+  width: 88px;
+  outline: none;
+  cursor: pointer;
+}
+.board-who:focus { border-color: var(--primary); }
+
+.board-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0 var(--space-3);
+  height: 44px;
+  font-size: var(--text-sm);
+  font-family: inherit;
+  color: var(--text-primary);
+  outline: none;
+}
+.board-input:focus { border-color: var(--primary); }
+
+.board-send {
+  flex-shrink: 0;
+  height: 44px;
+  min-height: unset;
+  padding: 0 var(--space-4);
+  font-size: var(--text-sm);
+}

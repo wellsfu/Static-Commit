@@ -1,6 +1,6 @@
 import { db } from './firebase.js';
 import {
-  doc, setDoc, addDoc, collection, getDocs, getDocsFromCache, onSnapshot, serverTimestamp, query, orderBy
+  doc, setDoc, addDoc, deleteDoc, collection, getDocs, getDocsFromCache, onSnapshot, serverTimestamp, query, orderBy, limit
 } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
 export async function getMemberProfiles() {
@@ -78,6 +78,21 @@ export function watchWeekStatus(weekId, callback) {
     const filled = snapshot.docs.map(d => d.id);
     callback(filled);
   });
+}
+
+export async function addMessage(memberId, text) {
+  await addDoc(collection(db, 'messages'), { memberId, text, timestamp: serverTimestamp() });
+}
+
+export function watchMessages(callback) {
+  const q = query(collection(db, 'messages'), orderBy('timestamp', 'desc'), limit(100));
+  return onSnapshot(q, snap => {
+    callback(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  });
+}
+
+export async function deleteMessage(messageId) {
+  await deleteDoc(doc(db, 'messages', messageId));
 }
 
 export async function getFullWeekData(weekId) {

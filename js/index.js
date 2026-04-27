@@ -1,6 +1,6 @@
 import { MEMBERS } from './constants.js';
 import { getWeekId, getWeekDates, getWeekLabel, shiftWeek } from './utils.js';
-import { watchWeekStatus, getMemberProfiles, saveMemberProfile, addLog, getWeekLogs } from './data.js';
+import { watchWeekStatus, getMemberProfiles, saveMemberProfile, addLog, getWeekLogs, addMessage, watchMessages, deleteMessage } from './data.js';
 
 const params    = new URLSearchParams(location.search);
 const weekId    = params.get('week') || getWeekId();
@@ -302,12 +302,109 @@ function formatDayState(s) {
   return s.slots.map(sl => `${sl.start}–${sl.end}`).join('、');
 }
 
+// --- Message Board ---
+const CHAT_KEY = 'sc_chat_member';
+
+const boardMsgEl   = document.getElementById('boardMessages');
+const boardWhoEl   = document.getElementById('boardWho');
+const boardInputEl = document.getElementById('boardInput');
+const boardSendEl  = document.getElementById('boardSend');
+
+MEMBERS.forEach(m => {
+  const opt = document.createElement('option');
+  opt.value = m.id;
+  opt.textContent = m.id;
+  boardWhoEl.appendChild(opt);
+});
+
+const savedChatMember = localStorage.getItem(CHAT_KEY);
+if (savedChatMember) boardWhoEl.value = savedChatMember;
+
+boardWhoEl.addEventListener('change', () => {
+  localStorage.setItem(CHAT_KEY, boardWhoEl.value);
+});
+
+function relativeTime(date) {
+  const mins = Math.floor((Date.now() - date) / 60000);
+  if (mins < 1)  return '剛剛';
+  if (mins < 60) return `${mins}分鐘前`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `${hrs}小時前`;
+  const mo = String(date.getMonth() + 1).padStart(2, '0');
+  const d  = String(date.getDate()).padStart(2, '0');
+  const h  = String(date.getHours()).padStart(2, '0');
+  const mi = String(date.getMinutes()).padStart(2, '0');
+  return `${mo}/${d} ${h}:${mi}`;
+}
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+let latestMessages = [];
+
+function renderMessages(msgs) {
+  latestMessages = msgs;
+  const myId = localStorage.getItem(CHAT_KEY);
+  if (msgs.length === 0) {
+    boardMsgEl.innerHTML = '<div class="board-empty">還沒有人說話，來說第一句吧！</div>';
+    return;
+  }
+  boardMsgEl.innerHTML = '';
+  msgs.forEach(msg => {
+    const ts   = msg.timestamp?.toDate?.() ?? null;
+    const time = ts ? relativeTime(ts) : '—';
+    const name = profiles[msg.memberId]?.displayName ?? msg.memberId;
+    const own  = msg.memberId === myId;
+    const el   = document.createElement('div');
+    el.className = 'board-msg' + (own ? ' board-msg--own' : '');
+    el.innerHTML = `
+      <div class="board-msg__header">
+        <span class="board-msg__name">${escapeHtml(name)}</span>
+        <span class="board-msg__time">${time}</span>
+        ${own ? `<button class="board-msg__del" data-id="${msg.id}" title="刪除">×</button>` : ''}
+      </div>
+      <div class="board-msg__text">${escapeHtml(msg.text)}</div>
+    `;
+    boardMsgEl.appendChild(el);
+  });
+}
+
+boardMsgEl.addEventListener('click', async e => {
+  const btn = e.target.closest('.board-msg__del');
+  if (!btn) return;
+  await deleteMessage(btn.dataset.id);
+});
+
+async function sendMessage() {
+  const text = boardInputEl.value.trim();
+  const who  = boardWhoEl.value;
+  if (!text) return;
+  if (!who) { boardWhoEl.focus(); return; }
+  boardSendEl.disabled = true;
+  try {
+    await addMessage(who, text);
+    boardInputEl.value = '';
+  } finally {
+    boardSendEl.disabled = false;
+    boardInputEl.focus();
+  }
+}
+
+boardSendEl.addEventListener('click', sendMessage);
+boardInputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); sendMessage(); }
+});
+
+watchMessages(renderMessages);
+
 // --- Init ---
 renderMembers(new Set());
 
 getMemberProfiles().then(p => {
   profiles = p;
   renderMembers(currentFilledSet);
+  if (latestMessages.length) renderMessages(latestMessages);
 });
 
 watchWeekStatus(weekId, updateStatus);
