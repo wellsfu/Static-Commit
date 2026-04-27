@@ -219,13 +219,20 @@ function showDetail(fullData, ds, minutePoint, rowIdx) {
   document.getElementById('detailSubhead').textContent = `${availCount} 人有空`;
 
   const membersEl = document.getElementById('detailMembers');
-  membersEl.innerHTML = membersStatus.map(ms => {
+  const available = membersStatus.filter(ms => ms.status === 'available');
+  const others    = membersStatus.filter(ms => ms.status !== 'available');
+
+  const renderChips = (list) => list.map(ms => {
     const icon = ms.status === 'available' ? '✅'
                 : ms.status === 'unavailable' ? '❌'
                 : '⬜';
     const note = ms.status === 'unfilled' ? '（未填寫）' : '';
     return `<span class="detail-member">${icon} ${displayName(ms.member)}${note}</span>`;
   }).join('');
+
+  membersEl.innerHTML =
+    `<div class="detail-members-row">${renderChips(available)}</div>` +
+    (others.length ? `<div class="detail-members-row">${renderChips(others)}</div>` : '');
 }
 
 function hideDetail() {
